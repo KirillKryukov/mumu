@@ -96,6 +96,18 @@ Also, the same extension with the original data can be used, e.g. "fa". or "fq",
 When compressing the Multi-Multi-FASTA file with [naf](https://github.com/KirillKryukov/naf),
 the "nafnaf" extension is recommended, to indicate the presence of multiple files within the archive.
 
+**Should I compress \*.fa or '\*.fa'?**<br>
+The recommended and more robust way is to use quotation: **'\*.fa'**.
+Trying to merge \*.fa results in shell expanding the mask and supplying all filenames as arguments to the _mumu.pl_ script.
+Normally it may work fine, but some day you'll try to compress a directory with thousands of files,
+which may overflow the maximum argv size of your system.
+When quoting the mask ('*.fa'), mask expansion occurs within the _mumu.pl_ script,
+where the limit is determined by available RAM, and therefore much larger number of files can be processed safely.
+
+**What about preserving permissions, owner and timestamp of the packed files?**<br>
+Currently these are not supported, but in principle the format can be extended to accomodate this information,
+if there is sufficient interest in this.
+
 ## Example application - compressing related genomes
 
 Suppose we have a set of related genomes, for example, 1,697 genomes of <i>Helicobacter pylori</i>.
