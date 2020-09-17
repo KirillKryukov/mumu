@@ -165,3 +165,13 @@ Decompressing and unpacking:<br>
   * <b>"Seqmagick"</b>: https://fhcrc.github.io/seqmagick/
 
   * <b>"Fasta Utilities"</b>: https://github.com/jimhester/fasta_utilities
+
+  * Ola Spjuth, Erik Bongcam-Rudloff, Johan Dahlberg, Martin Dahlo, Aleksi Kallio, Luca Pireddu, Francesco Vezzi, Eija Korpelainen (2016)
+<b>"Recommendations on e-infrastructures for next-generation sequencing"</b> <i>GigaScience</i>, 2016, 5, 26.
+
+  * Morteza Hosseini, Diogo Pratas, Armando J. Pinho (2016)
+<b>"A Survey on Data Compression Methods for Biological Sequences"</b>
+<i>Information</i>, 14 October 2016, 7, 56.
+
+  * Mikel Hernaez, Dmitri Pavlichin, Tsachy Weissman, Idoia Ochoa (2019)
+<b>"Genomic Data Compression"</b> <i>Annu. Rev. Biomed. Data Sci.</i> 2019, 2, 19-37.
