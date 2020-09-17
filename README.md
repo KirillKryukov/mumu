@@ -104,17 +104,17 @@ Compressed one by one using gzip results in a 804 MB set of files.
 A better compressor, such as [naf](https://github.com/KirillKryukov/naf), brings the size down to 675 MB.
 However the genomes still remain in 1,697 separate files.
 
-Let's try the two most common ways of bundling the genomes together in a single file: zip and tar.gz:
-we obtain a single archive of 767 and 803 MB, respectively.
+Let's try the two most common ways of bundling the files together - zip and tar.gz:
+we obtain archives of 767 and 803 MB, respectively.
 Although we now have single file, convenient for sharing or moving around, the size is still large.
 Also, accessing the sequence data now requires de-constructing the archive back into individual files.
 
-A better compressor may produce a smaller archive.
+A stronger compressor may be able to compress the tar file into a smaller archive.
 But the necessity to restore the original files before working on them will remain.
 
-Now, what happens if we combine the genomes into a Multi-Multi-FASTA file,
+Now, what if we combine the genomes into a Multi-Multi-FASTA file,
 and then compress it with a compressor such as [naf](https://github.com/KirillKryukov/naf)?
-We obtain a file that is only 80 MB - 10 times smaller and easy to send over network.
+We obtain a file that is only **80 MB** - 10 times smaller and easy to send over network.
 
 Importantly, FASTA-formatted sequences contained in this archive can be accessed by simply decompressing and piping the data to a FASTA-compatible tool.
 This means that many analyses can be performed without unpacking the archive, and without storing 1,697 files on filesystem.
@@ -127,3 +127,41 @@ Compressing:<br>
 
 Decompressing and unpacking:<br>
 `unnaf Hp.nafnaf | mumu.pl --unpack --dir 'Helicobacter'`
+
+## References
+
+  * David J. Lipman, William R. Pearson (1985) <b>"Rapid and sensitive protein similarity searches"</b> <i>Science</i>, 22 March 1985, 227(4693), 1435-1441.
+
+  * William R. Pearson, David J. Lipman (1988) <b>"Improved tools for biological sequence comparison"</b>
+<i>Proc. Natl. Acad. Sci. USA</i>, April 1988, 85(8), 2444-2448.
+
+  * Peter J.A. Cock, Christopher J. Fields, Naohisa Goto, Michael L. Heuer, Peter M. Rice (2010)
+<b>"The sanger FASTQ file format for sequences with quality scores, and the Solexa/Illumina FASTQ variants"</b>
+<i>Nucleic Acids Res.</i>, April 2010, 38, 1767–1771.
+
+  * Hongen Zhang (2016) <b>"Overview of sequence data formats"</b> <i>Methods in Molecular Biology</i>, 1 January 2016, 1418, 3-17.
+
+  * Kirill Kryukov, Mahoko Takahashi Ueda, So Nakagawa, Tadashi Imanishi (2019)
+<b>"Nucleotide Archival Format (NAF) enables efficient lossless reference-free compression of DNA sequences"</b>
+<i>Bioinformatics</i>, 35(19), 3826-3828.
+
+  * Kirill Kryukov, Mahoko Takahashi Ueda, So Nakagawa, Tadashi Imanishi (2020)
+<b>"Sequence Compression Benchmark (SCB) database — A comprehensive evaluation of reference-free compressors for FASTA-formatted sequences"</b>
+<i>GigaScience</i>, 9(7), giaa072.
+
+  * Tim Hulsen, Saumya S. Jamuar, Alan R. Moody, Jason H. Karnes, Orsolya Varga, Stine Hedensted, Roberto Spreafico, David A. Hafler, Eoin F. McKinney (2019)
+<b>"From Big Data to Precision Medicine"</b>
+<i>Frontiers in Medicine</i>, 1 March 2019, 6, 34.
+
+  * Heng Li, <b>"Seqtk"</b>: https://github.com/lh3/seqtk
+
+  * <b>"FASTA Format"</b> at Wikipedia: https://en.wikipedia.org/wiki/FASTA_format
+
+  * Wei Shen, Shuai Le, Yan Li, Fuquan Hu (2016) <b>"SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation"</b>
+<i>PLoS One</i>, 5 October 2016, 11(10), e0163962.
+
+  * <b>"FASTX-Toolkit"</b>: http://hannonlab.cshl.edu/fastx_toolkit/
+
+  * <b>"Seqmagick"</b>: https://fhcrc.github.io/seqmagick/
+
+  * <b>"Fasta Utilities"</b>: https://github.com/jimhester/fasta_utilities
