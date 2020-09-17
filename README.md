@@ -149,7 +149,7 @@ Decompressing and unpacking:<br>
 
   * Peter J.A. Cock, Christopher J. Fields, Naohisa Goto, Michael L. Heuer, Peter M. Rice (2010)
 <b>"The sanger FASTQ file format for sequences with quality scores, and the Solexa/Illumina FASTQ variants"</b>
-<i>Nucleic Acids Res.</i>, April 2010, 38, 1767–1771.
+<i>Nucleic Acids Res.</i>, April 2010, 38, 1767-1771.
 
   * Hongen Zhang (2016) <b>"Overview of sequence data formats"</b> <i>Methods in Molecular Biology</i>, 1 January 2016, 1418, 3-17.
 
@@ -158,7 +158,7 @@ Decompressing and unpacking:<br>
 <i>Bioinformatics</i>, 35(19), 3826-3828.
 
   * Kirill Kryukov, Mahoko Takahashi Ueda, So Nakagawa, Tadashi Imanishi (2020)
-<b>"Sequence Compression Benchmark (SCB) database — A comprehensive evaluation of reference-free compressors for FASTA-formatted sequences"</b>
+<b>"Sequence Compression Benchmark (SCB) database - A comprehensive evaluation of reference-free compressors for FASTA-formatted sequences"</b>
 <i>GigaScience</i>, 9(7), giaa072.
 
   * Tim Hulsen, Saumya S. Jamuar, Alan R. Moody, Jason H. Karnes, Orsolya Varga, Stine Hedensted, Roberto Spreafico, David A. Hafler, Eoin F. McKinney (2019)
