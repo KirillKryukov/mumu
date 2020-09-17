@@ -96,9 +96,9 @@ Also, the same extension with the original data can be used, e.g. "fa". or "fq",
 When compressing the Multi-Multi-FASTA file with [naf](https://github.com/KirillKryukov/naf),
 the "nafnaf" extension is recommended, to indicate the presence of multiple files within the archive.
 
-## Example application - Compression
+## Example application - compressing related genomes
 
-Suppose we have a set of related genomes, for example, 1,697 genomes of Helicobacter pylori.
+Suppose we have a set of related genomes, for example, 1,697 genomes of <i>Helicobacter pylori</i>.
 Uncompressed they occupy 2.8 GB in FASTA format.
 Compressed one by one using gzip results in a 804 MB set of files.
 A better compressor, such as [naf](https://github.com/KirillKryukov/naf), brings the size down to 675 MB.
@@ -109,14 +109,21 @@ we obtain a single archive of 767 and 803 MB, respectively.
 Although we now have single file, convenient for sharing or moving around, the size is still large.
 Also, accessing the sequence data now requires de-constructing the archive back into individual files.
 
+A better compressor may produce a smaller archive.
+But the necessity to restore the original files before working on them will remain.
+
 Now, what happens if we combine the genomes into a Multi-Multi-FASTA file,
 and then compress it with a compressor such as [naf](https://github.com/KirillKryukov/naf)?
-We obtain a file that is only 80 MB - 10 times smaller and easy to send over network - you can probably even attach it to an email.
-FASTA-formatted sequences can be accessed by simply decompressing and piping the data to a FASTA-compatible tool,
-which means that many analyses can be performed without de-constructing the archive, and without storing 1,697 files on filesystem.
-Only when necessary, you can decompress the archive into individual files.
+We obtain a file that is only 80 MB - 10 times smaller and easy to send over network.
 
-Example commands to use:<br>
-Compressing:<br> `mumu.pl --dir 'Helicobacter' 'Helicobacter pylori*' | ennaf -22 --text -o Hp.nafnaf`
+Importantly, FASTA-formatted sequences contained in this archive can be accessed by simply decompressing and piping the data to a FASTA-compatible tool.
+This means that many analyses can be performed without unpacking the archive, and without storing 1,697 files on filesystem.
+Only when necessary we will de-construct the archive into individual FASTA files.
+
+**Example commands:**
+
+Compressing:<br>
+`mumu.pl --dir 'Helicobacter' 'Helicobacter pylori*' | ennaf -22 --text -o Hp.nafnaf`
+
 Decompressing and unpacking:<br>
 `unnaf Hp.nafnaf | mumu.pl --unpack --dir 'Helicobacter'`
