@@ -1,4 +1,15 @@
 #!/usr/bin/env perl
+#
+# mumu.pl  -  Implementation of the Multi-Multi-FASTA file format
+#
+# Version 0.1.0 (September 18, 2020)
+#
+# By Kirill Kryukov
+#
+# https://github.com/KirillKryukov/mumu
+#
+# See LICENSE and README.md files at the GitHub repository for details.
+#
 
 use strict;
 use File::Basename qw(dirname);
@@ -6,14 +17,40 @@ use File::Glob qw(:bsd_glob);
 use File::Path qw(make_path);
 use Getopt::Long qw(:config pass_through);
 
-my ($dir, $separator, $stdin, $unpack, $tag_all) = ('.', '>');
+my ($dir, $separator) = ('.', '>');
+my ($stdin, $unpack, $tag_all, $help, $version);
 GetOptions(
-    'dir=s'  => \$dir,
-    'stdin'  => \$stdin,
-    'unpack' => \$unpack,
-    'sep'    => \$separator,
-    'all'    => \$tag_all,
+    'dir=s'   => \$dir,
+    'stdin'   => \$stdin,
+    'unpack'  => \$unpack,
+    'sep'     => \$separator,
+    'all'     => \$tag_all,
+    'help'    => \$help,
+    'version' => \$version,
 );
+
+if ($version)
+{
+    print "Multi-Multi-FASTA codec, version 0.1.0, 2020-09-18\n";
+    print "by Kirill Kryukov, https://github.com/KirillKryukov/mumu\n";
+    exit;
+}
+
+if ($help)
+{
+    print "Packing:\n";
+    print "    mumu.pl [OPTIONS] [FILE ..] [<LIST.txt] >packed.fa\n";
+    print "Unpacking:\n";
+    print "    mumu.pl --unpack [OPTIONS] <packed.fa\n";
+    print "Options:\n";
+    print "  --dir DIR   - Enter DIR before packing or unpacking\n";
+    print "  --sep 'STR' - Use STR as separator\n";
+    print "  --all       - Tag all sequences with filename\n";
+    print "  --stdin     - Read list of files to pack from standard input\n";
+    print "  --help      - Print this help and exit\n";
+    print "  --version   - Print version and exit\n";
+    exit;
+}
 
 
 my %file_seen;
