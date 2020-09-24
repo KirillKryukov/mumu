@@ -1,4 +1,4 @@
-# Multi-Multi-FASTA file format
+# Multi-Multi-FASTA/Q file format
 
 DNA and protein sequences are often stored in FASTA format [1-4].
 These days we put multiple sequences in a FASTA file,
@@ -13,18 +13,21 @@ Hence, this proposal of Multi-Multi-FASTA file format.
 It's a FASTA file, where sequence headers can have an optional ">filename" suffix.
 So, the complete sequence header looks like ">sequence name>filename".
 Such header indicates that this, and all subsequent sequences belong to the file "filename".
-This allows deconstructing the Multi-Multi-FASTA file back to individual FASTA files.
+This allows deconstructing a Multi-Multi-FASTA file back to individual FASTA files.
 
 Importantly, Multi-Multi-FASTA file can be processed with FASTA-compatible tools.
 It can be compressed with FASTA-specific compressors, searched with homology search tools, etc.
 When necessary, it can be deconstructed back into original FASTA files.
+
+The same principle can be used to combine multiple FASTQ files into a single Multi-Multi-FASTQ file.
+For FASTQ data, "@" is the default separator, so the tagged name looks like: "@readname@filename".
 
 
 
 ## Implementation
 
 The script _mumu.pl_ at this repo is the reference implementation.
-It allows both packing and unpacking a Multi-Multi-FASTA file.
+It allows both packing and unpacking a Multi-Multi-FASTA/Q file.
 
 ### Installing
 
@@ -40,20 +43,24 @@ sudo cp mumu/mumu.pl /usr/local/bin/
 
 Or just place the _mumu.pl_ script where you need it.
 
-### Packing multiple files into a Multi-Multi-FASTA file
+### Packing multiple files into a Multi-Multi-FASTA/Q file
 
-`mumu.pl data/*.fa >all.fa` - Combine all .fa files in "data" directory, store the result in a file "all.fa".
+`mumu.pl 'data/*.fa' >all.fa` - Combine all .fa files in "data" directory, store the result in a file "all.fa".
 
-`mumu.pl --dir data *.fa >all.fa` - Same thing, but chdir into the "data" directory first. The filenames stored in the output will have no directory part.
+`mumu.pl --dir data '*.fa' >all.fa` - Same, but enters into the "data" directory first. Filenames stored in the output will have no directory part.
 
-`mumu.pl --dir data --sep '<' *.fa >all.fa` - Use '<' as a separator between sequence name and filename in the output.
+`mumu.pl --dir data --sep '<' '*.fa' >all.fa` - Use '<' as a separator between sequence name and filename in the output.
 
-`mumu.pl --dir data --all *.fa >all.fa` - Add filename to all sequence names.
+`mumu.pl --dir data --all '*.fa' >all.fa` - Add filename to all sequence names.
 By default only the first sequence of each file is tagged with filename.
 
 `mumu.pl --stdin <list.txt >all.fa` - Pack files listed in "list.txt" into "all.fa".
 
-### Unpacking a Multi-Multi-FASTA file
+`mumu.pl --fastq --dir reads '*.fq' >all.fq` - Combine FASTQ files into a single Multi-Multi-FASTQ file.
+
+`mumu.pl '*.fa' >all.fa` - Don't do this! "all.fa" will be counted as one of the input files, potentially overflowing your storage space.
+
+### Unpacking a Multi-Multi-FASTA/Q file
 
 `mumu.pl --unpack all.fa` - Unpacks "all.fa" into individual files.
 
@@ -91,10 +98,6 @@ No problem, the filename part of the Multi-Multi-FASTA file can include path to 
 like this: ">sequence name>full/path/to/file".
 Whatever file paths are supplied to the packing command will be recorded in the packed file.
 During unpacking, the directories will be created automatically.
-
-**What about FASTQ data?**<br>
-Naturally the same principle can be also applied to FASTQ data.
-The current implementation does not support FASTQ, but it may be added in the future.
 
 **What filename extension should be used for Multi-Multi-FASTA files?**<br>
 The same extension with the original data can be used, e.g. "fa". or "fq", to distinguish between FASTA and FASTQ data.
@@ -153,6 +156,7 @@ Compressing:<br>
 
 Decompressing and unpacking:<br>
 `unnaf Hp.nafnaf | mumu.pl --unpack --dir 'Helicobacter'`
+
 
 
 ## References
