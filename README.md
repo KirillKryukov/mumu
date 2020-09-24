@@ -1,6 +1,6 @@
-# Multi-Multi-FASTA file format
+# Multi-Multi-FASTA/Q file format
 
-DNA and protein sequences are often stored in [FASTA format](https://en.wikipedia.org/wiki/FASTA_format).
+DNA and protein sequences are often stored in FASTA format [1-4].
 These days we put multiple sequences in a FASTA file,
 but originally FASTA file was supposed to contain just a single sequence.
 A file with multiple sequences was called "Multi-FASTA".
@@ -13,18 +13,21 @@ Hence, this proposal of Multi-Multi-FASTA file format.
 It's a FASTA file, where sequence headers can have an optional ">filename" suffix.
 So, the complete sequence header looks like ">sequence name>filename".
 Such header indicates that this, and all subsequent sequences belong to the file "filename".
-This allows deconstructing the Multi-Multi-FASTA file back to individual FASTA files.
+This allows deconstructing a Multi-Multi-FASTA file back to individual FASTA files.
 
 Importantly, Multi-Multi-FASTA file can be processed with FASTA-compatible tools.
 It can be compressed with FASTA-specific compressors, searched with homology search tools, etc.
 When necessary, it can be deconstructed back into original FASTA files.
+
+The same principle can be used to combine multiple FASTQ files into a single Multi-Multi-FASTQ file.
+For FASTQ data, "@" is the default separator, so the tagged name looks like: "@readname@filename".
 
 
 
 ## Implementation
 
 The script _mumu.pl_ at this repo is the reference implementation.
-It allows both packing and unpacking a Multi-Multi-FASTA file.
+It allows both packing and unpacking a Multi-Multi-FASTA/Q file.
 
 ### Installing
 
@@ -40,20 +43,24 @@ sudo cp mumu/mumu.pl /usr/local/bin/
 
 Or just place the _mumu.pl_ script where you need it.
 
-### Packing multiple files into a Multi-Multi-FASTA file
+### Packing multiple files into a Multi-Multi-FASTA/Q file
 
-`mumu.pl data/*.fa >all.fa` - Combine all .fa files in "data" directory, store the result in a file "all.fa".
+`mumu.pl 'data/*.fa' >all.fa` - Combine all .fa files in "data" directory, store the result in a file "all.fa".
 
-`mumu.pl --dir data *.fa >all.fa` - Same thing, but chdir into the "data" directory first. The filenames stored in the output will have no directory part.
+`mumu.pl --dir data '*.fa' >all.fa` - Same, but enters into the "data" directory first. Filenames stored in the output will have no directory part.
 
-`mumu.pl --dir data --sep '<' *.fa >all.fa` - Use '<' as a separator between sequence name and filename in the output.
+`mumu.pl --dir data --sep '<' '*.fa' >all.fa` - Use '<' as a separator between sequence name and filename in the output.
 
-`mumu.pl --dir data --all *.fa >all.fa` - Add filename to all sequence names.
+`mumu.pl --dir data --all '*.fa' >all.fa` - Add filename to all sequence names.
 By default only the first sequence of each file is tagged with filename.
 
 `mumu.pl --stdin <list.txt >all.fa` - Pack files listed in "list.txt" into "all.fa".
 
-### Unpacking a Multi-Multi-FASTA file
+`mumu.pl --fastq --dir reads '*.fq' >all.fq` - Combine FASTQ files into a single Multi-Multi-FASTQ file.
+
+`mumu.pl '*.fa' >all.fa` - Don't do this! "all.fa" will be counted as one of the input files, potentially overflowing your storage space.
+
+### Unpacking a Multi-Multi-FASTA/Q file
 
 `mumu.pl --unpack all.fa` - Unpacks "all.fa" into individual files.
 
@@ -91,10 +98,6 @@ No problem, the filename part of the Multi-Multi-FASTA file can include path to 
 like this: ">sequence name>full/path/to/file".
 Whatever file paths are supplied to the packing command will be recorded in the packed file.
 During unpacking, the directories will be created automatically.
-
-**What about FASTQ data?**<br>
-Naturally the same principle can be also applied to FASTQ data.
-The current implementation does not support FASTQ, but it may be added in the future.
 
 **What filename extension should be used for Multi-Multi-FASTA files?**<br>
 The same extension with the original data can be used, e.g. "fa". or "fq", to distinguish between FASTA and FASTQ data.
@@ -153,3 +156,57 @@ Compressing:<br>
 
 Decompressing and unpacking:<br>
 `unnaf Hp.nafnaf | mumu.pl --unpack --dir 'Helicobacter'`
+
+
+
+## References
+
+  1. David J. Lipman, William R. Pearson (1985) <b>"Rapid and sensitive protein similarity searches"</b> <i>Science</i>, 22 March 1985, 227(4693), 1435-1441.
+
+  2. William R. Pearson, David J. Lipman (1988) <b>"Improved tools for biological sequence comparison"</b>
+<i>Proc. Natl. Acad. Sci. USA</i>, April 1988, 85(8), 2444-2448.
+
+  3. Hongen Zhang (2016) <b>"Overview of sequence data formats"</b> <i>Methods in Molecular Biology</i>, 1 January 2016, 1418, 3-17.
+
+  4. <b>"FASTA Format"</b> at Wikipedia: https://en.wikipedia.org/wiki/FASTA_format
+
+
+
+## Related papers and links
+
+  * Peter J.A. Cock, Christopher J. Fields, Naohisa Goto, Michael L. Heuer, Peter M. Rice (2010)
+<b>"The sanger FASTQ file format for sequences with quality scores, and the Solexa/Illumina FASTQ variants"</b>
+<i>Nucleic Acids Res.</i>, April 2010, 38, 1767-1771.
+
+  * Kirill Kryukov, Mahoko Takahashi Ueda, So Nakagawa, Tadashi Imanishi (2019)
+<b>"Nucleotide Archival Format (NAF) enables efficient lossless reference-free compression of DNA sequences"</b>
+<i>Bioinformatics</i>, 35(19), 3826-3828.
+
+  * Kirill Kryukov, Mahoko Takahashi Ueda, So Nakagawa, Tadashi Imanishi (2020)
+<b>"Sequence Compression Benchmark (SCB) database - A comprehensive evaluation of reference-free compressors for FASTA-formatted sequences"</b>
+<i>GigaScience</i>, 9(7), giaa072.
+
+  * Tim Hulsen, Saumya S. Jamuar, Alan R. Moody, Jason H. Karnes, Orsolya Varga, Stine Hedensted, Roberto Spreafico, David A. Hafler, Eoin F. McKinney (2019)
+<b>"From Big Data to Precision Medicine"</b>
+<i>Frontiers in Medicine</i>, 1 March 2019, 6, 34.
+
+  * Heng Li, <b>"Seqtk"</b>: https://github.com/lh3/seqtk
+
+  * Wei Shen, Shuai Le, Yan Li, Fuquan Hu (2016) <b>"SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation"</b>
+<i>PLoS One</i>, 5 October 2016, 11(10), e0163962.
+
+  * <b>"FASTX-Toolkit"</b>: http://hannonlab.cshl.edu/fastx_toolkit/
+
+  * <b>"Seqmagick"</b>: https://fhcrc.github.io/seqmagick/
+
+  * <b>"Fasta Utilities"</b>: https://github.com/jimhester/fasta_utilities
+
+  * Ola Spjuth, Erik Bongcam-Rudloff, Johan Dahlberg, Martin Dahlo, Aleksi Kallio, Luca Pireddu, Francesco Vezzi, Eija Korpelainen (2016)
+<b>"Recommendations on e-infrastructures for next-generation sequencing"</b> <i>GigaScience</i>, 2016, 5, 26.
+
+  * Morteza Hosseini, Diogo Pratas, Armando J. Pinho (2016)
+<b>"A Survey on Data Compression Methods for Biological Sequences"</b>
+<i>Information</i>, 14 October 2016, 7, 56.
+
+  * Mikel Hernaez, Dmitri Pavlichin, Tsachy Weissman, Idoia Ochoa (2019)
+<b>"Genomic Data Compression"</b> <i>Annu. Rev. Biomed. Data Sci.</i> 2019, 2, 19-37.
