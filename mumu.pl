@@ -2,7 +2,7 @@
 #
 # mumu.pl  -  Implementation of the Multi-Multi-FASTA/Q file format
 #
-# Version 0.2.0 (September 24, 2020)
+# Version 0.3.0 (September 30, 2020)
 #
 # By Kirill Kryukov
 #
@@ -18,13 +18,14 @@ use File::Path qw(make_path);
 use Getopt::Long qw(:config pass_through);
 
 my ($dir) = ('.');
-my ($format, $stdin, $unpack, $tag_all, $separator, $help, $version);
+my ($format, $stdin, $unpack, $overwrite, $tag_all, $separator, $help, $version);
 GetOptions(
     'dir=s'   => \$dir,
     'fasta'   => sub { $format = 'fasta'; },
     'fastq'   => sub { $format = 'fastq'; },
     'stdin'   => \$stdin,
     'unpack'  => \$unpack,
+    'overwrite' => \$overwrite,
     'sep'     => \$separator,
     'all'     => \$tag_all,
     'help'    => \$help,
@@ -33,7 +34,7 @@ GetOptions(
 
 if ($version)
 {
-    print q`Multi-Multi-FASTA/Q codec, version 0.2.0, 2020-09-24
+    print q`Multi-Multi-FASTA/Q codec, version 0.3.0, 2020-09-30
 by Kirill Kryukov, https://github.com/KirillKryukov/mumu
 `;
     exit;
@@ -52,6 +53,7 @@ Options:
   --fasta     - Process FASTA-formatted data (default)
   --fastq     - Process FASTQ-formatted data
   --stdin     - Read list of files to pack from standard input
+  --overwrite - Overwrite existing files when unpacking
   --help      - Print this help and exit
   --version   - Print version and exit
 `;
@@ -61,6 +63,7 @@ Options:
 
 if (!defined $format) { $format = 'fasta'; }
 if (!defined $separator) { $separator = ($format eq 'fasta') ? '>' : '@'; }
+my $fastq = ($format eq 'fastq');
 
 
 my %file_seen;
@@ -88,94 +91,52 @@ sub mumu_unpack
 
     binmode STDIN;
 
-    if ($format eq 'fastq')
+    my $part_num = 0;
+    while (<STDIN>)
     {
-        my $part_num = 0;
-        while (<STDIN>)
+        if ( $fastq ? ($part_num == 0) : (substr($_, 0, 1) eq '>') )
         {
-            if ($part_num == 0)
+            my $s = index($_, $separator, 1);
+            if ($s > 0)
             {
-                my $s = index($_, $separator, 1);
-                if ($s > 0)
-                {
-                    if ($OUT) { close $OUT; }
+                if ($OUT) { close $OUT; }
 
-                    my $path = substr($_, $s + 1);
-                    $path =~ s/[\x0D\x0A]+$//;
-                    if ($path ne $prev_path)
+                my $path = substr($_, $s + 1);
+                $path =~ s/[\x0D\x0A]+$//;
+                $path =~ s/^([a-zA-Z]:|[\/\\]|\.\.[\/\\])+//;
+                $path =~ s/([\/\\])\.\.[\/\\]/$1/g;
+                if ($path ne $prev_path)
+                {
+                    if ($file_seen{$path})
                     {
-                        if ($file_seen{$path})
+                        open($OUT, '>>', $path) or die "Can't append to file \"$path\"\n";
+                        binmode $OUT;
+                    }
+                    else
+                    {
+                        if ($path =~ /[\/\\]/)
                         {
-                            open($OUT, '>>', $path) or die "Can't append to file \"$path\"\n";
+                            my $d = dirname($path);
+                            make_path($d);
+                            if (!-e $d or !-d $d) { die "Can't create directory \"$d\"\n"; }
                         }
-                        else
+                        if (!-e $path or $overwrite)
                         {
-                            if ($path =~ /[\/\\]/)
-                            {
-                                my $d = dirname($path);
-                                make_path($d);
-                                if (!-e $d or !-d $d) { die "Can't create directory \"$d\"\n"; }
-                            }
                             open($OUT, '>', $path) or die "Can't create file \"$path\"\n";
+                            binmode $OUT;
                             $file_seen{$path} = 1;
                         }
-                        binmode $OUT;
-                        $prev_path = $path;
+                        else { undef $OUT; }
                     }
-
-                    print $OUT substr($_, 0, $s), "\n";
-                    $part_num = 1;
-                    next;
+                    $prev_path = $path;
                 }
+
+                $_ = substr($_, 0, $s) . "\n";
             }
-
-            if (!$OUT) { die "Input is not in Multi-Multi-FASTQ format\n"; }
-            print $OUT $_;
-            $part_num = ($part_num + 1) & 3;
         }
-    }
-    else
-    {
-        while (<STDIN>)
-        {
-            if (substr($_, 0, 1) eq '>')
-            {
-                my $s = index($_, $separator, 1);
-                if ($s > 0)
-                {
-                    if ($OUT) { close $OUT; }
 
-                    my $path = substr($_, $s + 1);
-                    $path =~ s/[\x0D\x0A]+$//;
-                    if ($path ne $prev_path)
-                    {
-                        if ($file_seen{$path})
-                        {
-                            open($OUT, '>>', $path) or die "Can't append to file \"$path\"\n";
-                        }
-                        else
-                        {
-                            if ($path =~ /[\/\\]/)
-                            {
-                                my $d = dirname($path);
-                                make_path($d);
-                                if (!-e $d or !-d $d) { die "Can't create directory \"$d\"\n"; }
-                            }
-                            open($OUT, '>', $path) or die "Can't create file \"$path\"\n";
-                            $file_seen{$path} = 1;
-                        }
-                        binmode $OUT;
-                        $prev_path = $path;
-                    }
-
-                    print $OUT substr($_, 0, $s), "\n";
-                    next;
-                }
-            }
-
-            if (!$OUT) { die "Input is not in Multi-Multi-FASTA format\n"; }
-            print $OUT $_;
-        }
+        if ($OUT) { print $OUT $_; }
+        if ($fastq) { $part_num = ($part_num + 1) & 3; }
     }
 
     if ($OUT) { close $OUT; }
@@ -213,7 +174,7 @@ sub mumu_pack
 
         if ($tag_all)
         {
-            if ($format eq 'fastq')
+            if ($fastq)
             {
                 my $part_num = 0;
                 while (<$IN>)
