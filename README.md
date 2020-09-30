@@ -118,15 +118,16 @@ if there is sufficient interest in this.
 **Can it pack a directory of FASTA files recursively?**<br>
 The format has no problem with storing the entire directory tree.
 The current tool does not have recursive mode,
-but it can accept list of files from e.g. _find_ command:<br>
-`find DATASET -type f -name '*.fna' | mumu.pl --stdin | ennaf -22 -o DATASET.nafnaf`
-
-**Can a malicious archive overwrite unrelated files during unpacking?**<br>
-No. All absolute paths are converted to relative, and all '..' in paths are ignored during unpacking.
-It can only go down the directory tree, not up.
+but it can read the list of files to compress from stdin, making recursive packing possible.
+For example, here is how you can pack an entire directory using _find_ command:<br>
+`find DATASET -type f -name '*.fna' | mumu.pl --stdin | ennaf -22 -o DATASET.mfa.naf`
 
 **Does it overwrite existing files during unpacking?**<br>
 By default, no. Add `--overwrite` option to overwrite existing files.
+
+**Can a malicious archive put files outside of target directory during unpacking?**<br>
+No. All absolute paths are converted to relative, and all '..' in paths are ignored during unpacking.
+It can only go down the directory tree, not up.
 
 
 ## Example application - compressing related genomes
@@ -157,10 +158,10 @@ Only when necessary we will de-construct the archive into individual FASTA files
 **Example commands:**
 
 Compressing:<br>
-`mumu.pl --dir 'Helicobacter' 'Helicobacter pylori*' | ennaf -22 --text -o Hp.nafnaf`
+`mumu.pl --dir 'Helicobacter' 'Helicobacter pylori*' | ennaf -22 --text -o Hp.mfa.naf`
 
 Decompressing and unpacking:<br>
-`unnaf Hp.nafnaf | mumu.pl --unpack --dir 'Helicobacter'`
+`unnaf Hp.mfa.naf | mumu.pl --unpack --dir 'Helicobacter'`
 
 
 
