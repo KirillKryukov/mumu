@@ -99,10 +99,9 @@ like this: ">sequence name>full/path/to/file".
 Whatever file paths are supplied to the packing command will be recorded in the packed file.
 During unpacking, the directories will be created automatically.
 
-**What filename extension should be used for Multi-Multi-FASTA files?**<br>
-The same extension with the original data can be used, e.g. "fa". or "fq", to distinguish between FASTA and FASTQ data.
-When compressing the Multi-Multi-FASTA file with [naf](https://github.com/KirillKryukov/naf),
-the "nafnaf" extension is recommended, to indicate the presence of multiple files within the archive.
+**What filename extension should be used for Multi-Multi-FASTA/Q files?**<br>
+Extensions ".mfa" and ".mfq" can be used for Multi-Multi-FASTA and Multi-Multi-FASTQ files, respectively.
+Alternatively, any of the usual FASTA and FASTQ extensions can be used (".fa", ".fasta", ".fna", ".fq", ".fastq", etc).
 
 **Should I compress \*.fa or '\*.fa'?**<br>
 The recommended and more robust way is to use quotation: **'\*.fa'**.
@@ -122,6 +121,12 @@ The current tool does not have recursive mode,
 but it can accept list of files from e.g. _find_ command:<br>
 `find DATASET -type f -name '*.fna' | mumu.pl --stdin | ennaf -22 -o DATASET.nafnaf`
 
+**Can a malicious archive overwrite unrelated files during unpacking?**<br>
+No. All absolute paths are converted to relative, and all '..' in paths are ignored during unpacking.
+It can only go down the directory tree, not up.
+
+**Does it overwrite existing files during unpacking?**<br>
+By default, no. Add `--overwrite` option to overwrite existing files.
 
 
 ## Example application - compressing related genomes
