@@ -45,28 +45,32 @@ Or just place the _mumu.pl_ script where you need it.
 
 ### Packing multiple files into a Multi-Multi-FASTA/Q file
 
-`mumu.pl 'data/*.fa' >all.fa` - Combine all .fa files in "data" directory, store the result in a file "all.fa".
+`mumu.pl 'data/*.fa' >all.mfa` - Combine all .fa files in "data" directory, store the result in a file "all.mfa".
 
-`mumu.pl --dir data '*.fa' >all.fa` - Same, but enters into the "data" directory first. Filenames stored in the output will have no directory part.
+`mumu.pl --dir data '*.fa' >all.mfa` - Same, but enters into the "data" directory first. Filenames stored in the output will have no directory part.
 
-`mumu.pl --dir data --sep '<' '*.fa' >all.fa` - Use '<' as a separator between sequence name and filename in the output.
+`mumu.pl --dir data --sep '<' '*.fa' >all.mfa` - Use '<' as a separator between sequence name and filename in the output.
 
-`mumu.pl --dir data --all '*.fa' >all.fa` - Add filename to all sequence names.
+`mumu.pl --dir data --all '*.fa' >all.mfa` - Add filename to all sequence names.
 By default only the first sequence of each file is tagged with filename.
 
-`mumu.pl --stdin <list.txt >all.fa` - Pack files listed in "list.txt" into "all.fa".
+`mumu.pl --stdin <list.txt >all.mfa` - Pack files listed in "list.txt" into "all.mfa".
 
-`mumu.pl --fastq --dir reads '*.fq' >all.fq` - Combine FASTQ files into a single Multi-Multi-FASTQ file.
+`mumu.pl --fastq --dir reads '*.fq' >all.mfq` - Combine FASTQ files into a single Multi-Multi-FASTQ file.
 
 `mumu.pl '*.fa' >all.fa` - Don't do this! "all.fa" will be counted as one of the input files, potentially overflowing your storage space.
 
+`mumu.pl --dir data --no-ext --cmd "unnaf '{PATH}'" '*.naf' >all.mfa` - Decompress NAF-formatted files and pack their data into "all.mfa".
+
 ### Unpacking a Multi-Multi-FASTA/Q file
 
-`mumu.pl --unpack all.fa` - Unpacks "all.fa" into individual files.
+`mumu.pl --unpack all.mfa` - Unpacks "all.mfa" into individual files.
 
-`mumu.pl --unpack --dir new all.fa` - Creates directory "new", enters it, and then unpacks "all.fa".
+`mumu.pl --unpack --dir 'new' all.mfa` - Creates directory "new", enters it, and then unpacks "all.mfa".
 
-`mumu.pl --unpack --sep '<' all.fa` - Unpacks file where "<" was used as separator between sequence name and filename.
+`mumu.pl --unpack --sep '<' all.mfa` - Unpacks file where "<" was used as separator between sequence name and filename.
+
+`mumu.pl --unpack --dir 'new' all.mfa --cmd "ennaf -22 -o '{PATH}.naf'"` - Unpack "all.mfa", compress each unpacked file with _ennaf_ on the fly.
 
 
 
@@ -129,8 +133,14 @@ By default, no. Add `--overwrite` option to overwrite existing files.
 No. All absolute paths are converted to relative, and all '..' in paths are ignored during unpacking.
 It can only go down the directory tree, not up.
 
+**Can gzipped files be decompressed on-the-fly and extracted data packed together?**<br>
+Yes. `--cmd ...` option allows specifying a command that will be run on every processed individual file (during both packing and unpacking).
+This allows decompressing the files on-the-fly before packing their data.
+It also allows compressing (or otherwise processing) each extracted file during unpacking.
 
-## Example application - compressing related genomes
+
+
+## Compressing related genomes
 
 Suppose we have a set of related genomes, for example, 1,697 genomes of <i>Helicobacter pylori</i>.
 Uncompressed they occupy 2.8 GB in FASTA format.
@@ -155,13 +165,29 @@ can be accessed by simply decompressing and piping the data to a FASTA-compatibl
 This means that many analyses can be performed without unpacking the archive, and without storing 1,697 files on filesystem.
 Only when necessary we will de-construct the archive into individual FASTA files.
 
-**Example commands:**
+**Commands:**
 
 Compressing:<br>
-`mumu.pl --dir 'Helicobacter' 'Helicobacter pylori*' | ennaf -22 --text -o Hp.mfa.naf`
+`mumu.pl --dir 'Helicobacter' 'Helicobacter pylori*' | ennaf -22 --text -o 'Hp.mfa.naf'`
 
 Decompressing and unpacking:<br>
-`unnaf Hp.mfa.naf | mumu.pl --unpack --dir 'Helicobacter'`
+`unnaf 'Hp.mfa.naf' | mumu.pl --unpack --dir 'Helicobacter'`
+
+
+
+## Compressing already compressed files
+
+Suppose you have a set of genomes which are already compressed one by one (e.g., using NAF format).
+Now you'd like to pack them together and compress them into a single file.
+The simplest way is to decompress the genomes first, but then you'd have to store all the huge decompressed data.
+Ideally you would prefer decompression to occur on-the-fly when packing the sequences together.
+Using the `--cmd` option this can be achieved in a single step:
+
+`mumu.pl --dir 'Helicobacter' --no-ext --cmd "unnaf '{PATH}'" 'Helicobacter pylori*.naf' | ennaf -22 --text -o 'Hp.mfa.naf'`
+
+It is also possible to unpack the resulting archive back directly into individually compressed genomes:
+
+`unnaf 'Hp.mfa.naf' | mumu.pl --unpack --dir 'Helicobacter' --cmd "ennaf -22 -o '{PATH}.naf'"`
 
 
 
