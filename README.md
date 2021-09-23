@@ -45,7 +45,9 @@ Or just place the _mumu.pl_ script where you need it.
 
 ### Packing multiple files into a Multi-Multi-FASTA/Q file
 
-`mumu.pl 'data/*.fa' >all.mfa` - Combine all .fa files in "data" directory, store the result in a file "all.mfa".
+`mumu.pl 'data/*.fa' >all.mfa` - Combine all .fa FASTA files in "data" directory, store the result in a file "all.mfa".
+
+`mumu.pl --fastq 'data/*.fq' >all.mfq` - Combine all .fq FASTQ files in "data" directory, store the result in a file "all.mfq".
 
 `mumu.pl --dir data '*.fa' >all.mfa` - Same, but enters into the "data" directory first. Filenames stored in the output will have no directory part.
 
@@ -64,13 +66,15 @@ By default only the first sequence of each file is tagged with filename.
 
 ### Unpacking a Multi-Multi-FASTA/Q file
 
-`mumu.pl --unpack all.mfa` - Unpacks "all.mfa" into individual files.
+`mumu.pl --unpack <all.mfa` - Unpacks "all.mfa" into individual FASTA files.
 
-`mumu.pl --unpack --dir 'new' all.mfa` - Creates directory "new", enters it, and then unpacks "all.mfa".
+`mumu.pl --unpack --fastq <all.mfq` - Unpacks "all.mfq" FASTQ file into individual FASTQ files.
 
-`mumu.pl --unpack --sep '<' all.mfa` - Unpacks file where "<" was used as separator between sequence name and filename.
+`mumu.pl --unpack --dir 'new' <all.mfa` - Creates directory "new", enters it, and then unpacks "all.mfa".
 
-`mumu.pl --unpack --dir 'new' all.mfa --cmd "ennaf -22 -o '{PATH}.naf'"` - Unpack "all.mfa", compress each unpacked file with _ennaf_ on the fly.
+`mumu.pl --unpack --sep '<' <all.mfa` - Unpacks file where "<" was used as separator between sequence name and filename.
+
+`mumu.pl --unpack --dir 'new' <all.mfa --cmd "ennaf -22 -o '{PATH}.naf'"` - Unpack "all.mfa", compress each unpacked file with _ennaf_ on the fly.
 
 
 
